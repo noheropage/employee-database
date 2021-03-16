@@ -1,0 +1,3 @@
+-- title varchar(30)
+-- salary decimal
+-- department_id int

@@ -1,0 +1,4 @@
+-- first_name varchar(30)
+-- last_name varchar(30)
+-- role_id int
+-- manager_id int 
