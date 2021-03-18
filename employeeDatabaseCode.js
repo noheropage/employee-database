@@ -39,9 +39,9 @@ const startSearch = () => {
             case 'View all employees by department':
                 departmentSearch();
                 break;
-            // case 'View all employees by manager':
-            //     managerSearch();
-            //     break;
+            case 'View all employees by manager':
+                managerSearch();
+                break;
             // case 'Add an employee':
             //     addEmployee();
             //     break;
@@ -65,7 +65,7 @@ const startSearch = () => {
 };
 
 const employeeSearch = () => {
-    connection.query('SELECT * from employee', (err, res) => {
+    connection.query('SELECT employee.id, employee.first_name, employee.last_name, department.name, department.manager, role.title, role.salary FROM employee INNER JOIN department ON (employee.manager_id=department.id) INNER JOIN role ON (employee.role_id=role.id)', (err, res) => {
         if (err) throw err;
         console.table(res);
         startSearch();
@@ -78,8 +78,8 @@ const departmentSearch = () => {
         type: 'input',
         message: 'What department would you like to search for?'
     }).then((answer) => {
-        let query = 'SELECT * FROM employee WHERE ?'
-        connection.query(query, { department: answer.department }, (err, res) => {
+        let query = 'SELECT employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN department ON (employee.manager_id=department.id) INNER JOIN role ON (employee.role_id=role.id) WHERE (department.name = ?)'
+        connection.query(query, [answer.department, answer.department], (err, res) => {
             if (err) throw err;
             console.table(res)
             startSearch();
@@ -88,7 +88,20 @@ const departmentSearch = () => {
 };
      
 
-// managerSearch();
+const managerSearch = () => {
+    inquirer.prompt({
+        name: 'manager',
+        type: 'input',
+        message: 'What manager would you like to search for?'
+    }).then((answer) => {
+        let query = 'SELECT employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN department ON (employee.manager_id=department.id) INNER JOIN role ON (employee.role_id=role.id) WHERE (department.manager = ?)'
+        connection.query(query, [answer.manager, answer.manager], (err, res) => {
+            if (err) throw err;
+            console.table(res)
+            startSearch();
+        })
+    })
+};
                
 // addEmployee();
                

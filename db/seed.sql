@@ -1,7 +1,7 @@
 INSERT INTO employee
-VALUES (1,'Page','Black',1,null),
-(2,'Steve','Steverson',3,null),
-(3,'Bob','Glass',2,null);
+VALUES (1,'Page','Black',1,1),
+(2,'Steve','Steverson',3,1),
+(3,'Bob','Glass',2,2);
 
 INSERT INTO department
 VALUES (1,'Software'),
