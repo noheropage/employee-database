@@ -65,10 +65,23 @@ const startSearch = () => {
 };
 
 const employeeSearch = () => {
-
+    connection.query('SELECT * from employees', (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        startSearch();
+    })
 }
 
-departmentSearch();
+const departmentSearch = () => {
+    inquirer.prompt({
+        name: 'department',
+        type: 'input',
+        message: 'What department would you like to search for?'
+    }).then((answer) => {
+        let query = 'SELECT * FROM employees WHERE ?'
+    })
+};
+     
 
 managerSearch();
                
