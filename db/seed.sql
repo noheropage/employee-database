@@ -4,8 +4,8 @@ VALUES (1,'Page','Black',1,1),
 (3,'Bob','Glass',2,2);
 
 INSERT INTO department
-VALUES (1,'Software'),
-(2,'Administration');
+VALUES (1,'Software','Gavin'),
+(2,'Administration','Jack');
 
 INSERT INTO role
 VALUES (1,'Developer',100000.55,1),

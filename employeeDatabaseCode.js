@@ -42,9 +42,9 @@ const startSearch = () => {
             case 'View all employees by manager':
                 managerSearch();
                 break;
-            // case 'Add an employee':
-            //     addEmployee();
-            //     break;
+            case 'Add an employee':
+                addEmployee();
+                break;
             // case 'Remove an employee':
             //     removeEmployee();
             //     break;
@@ -87,7 +87,6 @@ const departmentSearch = () => {
     })
 };
      
-
 const managerSearch = () => {
     inquirer.prompt({
         name: 'manager',
@@ -103,7 +102,57 @@ const managerSearch = () => {
     })
 };
                
-// addEmployee();
+const addEmployee = () => {
+    inquirer.prompt([
+        {
+            name: 'firstName',
+            type: 'input',
+            message: 'First name: ',
+        },
+        {
+            name: 'lastName',
+            type: 'input',
+            message: 'Last name: ',
+        },
+        {
+            name: 'role',
+            type: 'input',
+            message: 'Role: ',
+        },
+        {
+            name: 'department',
+            type: 'input',
+            message: 'Department: ',
+        },
+        {
+            name: 'manager',
+            type: 'input',
+            message: 'Manager: ',
+        },
+    ]).then((answer) => {
+        connection.query(
+            'INSERT INTO employee SET ?',
+            {
+                first_name: answer.firstName,
+                last_name: answer.lastName,
+            },
+            // 'INSERT INTO role SET ?',
+            // {
+            //     title: answer.role,
+            // },
+            // 'INSERT INTO department SET ?',
+            // {
+            //     name: answer.department,
+            //     manager: answer.manager,
+            // },
+            (err) => {
+                if (err) throw err;
+                console.log('Successfully added employee');
+                startSearch();
+            }
+        );
+    });
+};
                
 // removeEmployee();
               
