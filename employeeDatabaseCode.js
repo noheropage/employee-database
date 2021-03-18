@@ -39,24 +39,24 @@ const startSearch = () => {
             case 'View all employees by department':
                 departmentSearch();
                 break;
-            case 'View all employees by manager':
-                managerSearch();
-                break;
-            case 'Add an employee':
-                addEmployee();
-                break;
-            case 'Remove an employee':
-                removeEmployee();
-                break;
-            case 'Update an employee role':
-                updateRole();
-                break;
-            case 'Update an employee manager':
-                updateManager();
-                break;
-            case 'Add a department':
-                addDepartment();
-                break;
+            // case 'View all employees by manager':
+            //     managerSearch();
+            //     break;
+            // case 'Add an employee':
+            //     addEmployee();
+            //     break;
+            // case 'Remove an employee':
+            //     removeEmployee();
+            //     break;
+            // case 'Update an employee role':
+            //     updateRole();
+            //     break;
+            // case 'Update an employee manager':
+            //     updateManager();
+            //     break;
+            // case 'Add a department':
+            //     addDepartment();
+            //     break;
             default:
                 console.log(`Invalid: ${answer.action}`);
                 break;
@@ -65,7 +65,7 @@ const startSearch = () => {
 };
 
 const employeeSearch = () => {
-    connection.query('SELECT * from employees', (err, res) => {
+    connection.query('SELECT * from employee', (err, res) => {
         if (err) throw err;
         console.table(res);
         startSearch();
@@ -78,19 +78,24 @@ const departmentSearch = () => {
         type: 'input',
         message: 'What department would you like to search for?'
     }).then((answer) => {
-        let query = 'SELECT * FROM employees WHERE ?'
+        let query = 'SELECT * FROM employee WHERE ?'
+        connection.query(query, { department: answer.department }, (err, res) => {
+            if (err) throw err;
+            console.table(res)
+            startSearch();
+        })
     })
 };
      
 
-managerSearch();
+// managerSearch();
                
-addEmployee();
+// addEmployee();
                
-removeEmployee();
+// removeEmployee();
               
-updateRole();
+// updateRole();
               
-updateManager();
+// updateManager();
 
-addDepartment();
+// addDepartment();
