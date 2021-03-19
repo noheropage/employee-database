@@ -54,9 +54,9 @@ const startSearch = () => {
             // case 'Update an employee manager':
             //     updateManager();
             //     break;
-            // case 'Add a department':
-            //     addDepartment();
-            //     break;
+            case 'Add a department':
+                addDepartment();
+                break;
             default:
                 console.log(`Invalid: ${answer.action}`);
                 break;
@@ -160,4 +160,25 @@ const addEmployee = () => {
               
 // updateManager();
 
-// addDepartment();
+const addDepartment = () => {
+    inquirer.prompt([
+        {
+            name: 'department',
+            type: 'input',
+            message: 'Department name: ',
+        },
+        {
+            name: 'manager',
+            type: 'input',
+            message: 'Manager name',
+        }
+    ]).then((answer) => {
+        connection.query(
+            'INSERT INTO department SET ?',
+            {
+                name: answer.department,
+                manager: answer.manager,
+            }
+        )
+    })
+};
