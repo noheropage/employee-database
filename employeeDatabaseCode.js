@@ -26,10 +26,12 @@ const startSearch = () => {
             'View all employees by department',
             'View all employees by manager',
             'Add an employee',
-            'Remove an employee',
+            'Add a department',
+            'Add a role',
+            // 'Remove an employee',
             'Update an employee role',
             'Update an employee manager',
-            'Add a department',
+            
         ],
     }).then((answer) => {
         switch (answer.action) {
@@ -87,22 +89,42 @@ const departmentSearch = () => {
     })
 };
      
-const managerSearch = () => {
-    inquirer.prompt({
-        name: 'manager',
-        type: 'input',
-        message: 'What manager would you like to search for?'
-    }).then((answer) => {
-        let query = 'SELECT employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN department ON (employee.manager_id=department.id) INNER JOIN role ON (employee.role_id=role.id) WHERE (department.manager = ?)'
-        connection.query(query, [answer.manager, answer.manager], (err, res) => {
+// const managerSearch = () => {
+//     inquirer.prompt({
+//         name: 'manager',
+//         type: 'input',
+//         message: 'What manager would you like to search for?'
+//     }).then((answer) => {
+//         let query = 'SELECT employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN department ON (employee.manager_id=department.id) INNER JOIN role ON (employee.role_id=role.id) WHERE (department.manager = ?)'
+//         connection.query(query, [answer.manager, answer.manager], (err, res) => {
+//             if (err) throw err;
+//             console.table(res)
+//             startSearch();
+//         })
+//     })
+// };
+const selectAll = (tableName) => {
+    return new Promise((resolve) => {
+        connection.query(`SELECT * FROM ${tableName}`, (err, res) => {
             if (err) throw err;
-            console.table(res)
-            startSearch();
+            resolve(res);
         })
     })
-};
-               
-const addEmployee = () => {
+}
+
+const addEmployee = async () => {
+    let allRoles = await selectAll('role')
+    
+    console.log(allRoles[0].title);
+    let roleArray = allRoles.map(function(role){
+        return {
+            name: role.title,
+            value: role.id,
+            
+        }
+    })    
+    console.log(roleArray);
+    
     inquirer.prompt([
         {
             name: 'firstName',
@@ -116,26 +138,28 @@ const addEmployee = () => {
         },
         {
             name: 'role',
-            type: 'input',
-            message: 'Role: ',
+            type: 'rawlist',
+            message: 'Pick a role',
+            choices: roleArray,
         },
-        {
-            name: 'department',
-            type: 'input',
-            message: 'Department: ',
-        },
-        {
-            name: 'manager',
-            type: 'input',
-            message: 'Manager: ',
-        },
+        // {
+        //     name: 'department',
+        //     type: 'input',
+        //     message: 'Department: ',
+        // },
+        // {
+        //     name: 'manager',
+        //     type: 'input',
+        //     message: 'Manager: ',
+        // },
     ]).then((answer) => {
-        connection.query(
-            'INSERT INTO employee SET ?',
-            {
-                first_name: answer.firstName,
-                last_name: answer.lastName,
-            },
+        console.log(answer);
+        // connection.query(
+        //     'INSERT INTO employee SET ?',
+        //     {
+        //         first_name: answer.firstName,
+        //         last_name: answer.lastName,
+        //     },
             // 'INSERT INTO role SET ?',
             // {
             //     title: answer.role,
@@ -145,12 +169,12 @@ const addEmployee = () => {
             //     name: answer.department,
             //     manager: answer.manager,
             // },
-            (err) => {
-                if (err) throw err;
-                console.log('Successfully added employee');
-                startSearch();
-            }
-        );
+            // (err) => {
+            //     if (err) throw err;
+            //     console.log('Successfully added employee');
+            //     startSearch();
+        //     }
+        // );
     });
 };
                

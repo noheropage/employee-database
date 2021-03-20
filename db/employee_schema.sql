@@ -12,13 +12,12 @@ CREATE TABLE employee(
     manager_id INT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (role_id) REFERENCES role(id),
-    FOREIGN KEY (manager_id) REFERENCES ??????
+    FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
 
 CREATE TABLE department(
     id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(30),
-    ????manager VARCHAR(30),
     PRIMARY KEY (id)
 );
 
