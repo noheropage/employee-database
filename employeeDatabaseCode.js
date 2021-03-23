@@ -24,13 +24,13 @@ const startSearch = () => {
         choices: [
             'View all employees',
             'View all employees by department',
-            'View all employees by manager',
+            // 'View all employees by manager',
             'Add an employee',
             'Add a department',
             'Add a role',
             // 'Remove an employee',
             'Update an employee role',
-            'Update an employee manager',
+            // 'Update an employee manager',
         ],
     }).then((answer) => {
         switch (answer.action) {
@@ -40,9 +40,9 @@ const startSearch = () => {
             case 'View all employees by department':
                 departmentSearch();
                 break;
-            case 'View all employees by manager':
-                managerSearch();
-                break;
+            // case 'View all employees by manager':
+            //     managerSearch();
+            //     break;
             case 'Add an employee':
                 addEmployee();
                 break;
@@ -69,20 +69,28 @@ const startSearch = () => {
 };
 
 const employeeSearch = () => {
-    connection.query('SELECT employee.id, employee.first_name, employee.last_name, department.name, department.manager, role.title, role.salary FROM employee INNER JOIN department ON (employee.manager_id=department.id) INNER JOIN role ON (employee.role_id=role.id)', (err, res) => {
+    connection.query('SELECT employee.id, employee.first_name, employee.last_name, department.name AS department, role.title AS title, role.salary FROM employee JOIN role ON (employee.role_id=role.id) JOIN department ON (role.department_id=department.id)', (err, res) => {
         if (err) throw err;
         console.table(res);
         startSearch();
     })
 }
 
-const departmentSearch = () => {
+const departmentSearch = async () => {
+    const allDepartments = await selectAll('department')
+    const departmentArray = allDepartments.map(function(department){
+        return {
+            name: department.name,
+            value: department.id,
+        }
+    })
     inquirer.prompt({
         name: 'department',
-        type: 'input',
-        message: 'What department would you like to search for?'
+        type: 'rawlist',
+        message: 'Which department would you like to view?',
+        choices: departmentArray,
     }).then((answer) => {
-        let query = 'SELECT employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN department ON (employee.manager_id=department.id) INNER JOIN role ON (employee.role_id=role.id) WHERE (department.name = ?)'
+        let query = 'SELECT employee.first_name, employee.last_name, role.title AS title, role.salary, department.name FROM employee JOIN role ON (employee.role_id=role.id) JOIN department ON (role.department_id=department.id) WHERE (department.id = ?)'
         connection.query(query, [answer.department, answer.department], (err, res) => {
             if (err) throw err;
             console.table(res)
@@ -90,21 +98,47 @@ const departmentSearch = () => {
         })
     })
 };
-     
-// const managerSearch = () => {
+
+// const findManagers = async () => {
+//     const allEmployees = await selectAll('employee')
+//     const employeeArray = allEmployees.map(function(employees){
+//         return {
+//             name: employees.first_name + ' ' + employees.last_name,
+//             value: employees.id
+//         }
+//     })
+// }
+
+// const managerSearch = async () => {
+//     const allEmployees = await selectAll('employee')
+//     // if manager_id is not null, return the employee info with that id 
+//     const employeeArray = allEmployees.map(function(employees){
+//         return {
+//             name: employees.first_name + ' ' + employees.last_name,
+//             value: employees.id
+//         }
+//     })
 //     inquirer.prompt({
 //         name: 'manager',
-//         type: 'input',
-//         message: 'What manager would you like to search for?'
+//         type: 'list',
+//         message: 'What manager would you like to search for?',
+//         choices: employeeArray,
 //     }).then((answer) => {
-//         let query = 'SELECT employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN department ON (employee.manager_id=department.id) INNER JOIN role ON (employee.role_id=role.id) WHERE (department.manager = ?)'
-//         connection.query(query, [answer.manager, answer.manager], (err, res) => {
+//         let query = 'SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role ON (employee.role_id=role.id) INNER JOIN department ON (role.department_id=department.id) WHERE (employee.manager_id = ?)'
+//         console.log(query[0]);
+//         if (query[0] == 0) {
+//             console.log('That employee is not a manager');
+//             managerSearch();
+//         } else {
+//             connection.query(query, [answer.manager, answer.manager], (err, res) => {
 //             if (err) throw err;
 //             console.table(res)
 //             startSearch();
 //         })
+//         }
 //     })
 // };
+
 const selectAll = (tableName) => {
     return new Promise((resolve) => {
         connection.query(`SELECT * FROM ${tableName}`, (err, res) => {
