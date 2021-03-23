@@ -31,7 +31,6 @@ const startSearch = () => {
             // 'Remove an employee',
             'Update an employee role',
             'Update an employee manager',
-            
         ],
     }).then((answer) => {
         switch (answer.action) {
@@ -58,6 +57,9 @@ const startSearch = () => {
             //     break;
             case 'Add a department':
                 addDepartment();
+                break;
+            case 'Add a role':
+                addRole();
                 break;
             default:
                 console.log(`Invalid: ${answer.action}`);
@@ -113,17 +115,22 @@ const selectAll = (tableName) => {
 }
 
 const addEmployee = async () => {
-    let allRoles = await selectAll('role')
-    
-    console.log(allRoles[0].title);
-    let roleArray = allRoles.map(function(role){
+    const allRoles = await selectAll('role')
+    const allManagers = await selectAll('employee')
+    const roleArray = allRoles.map(function(role){
         return {
             name: role.title,
             value: role.id,
-            
+        }
+    })
+
+    const managerArray = allManagers.map(function(managers){
+        const fullName = managers.first_name + " " + managers.last_name;
+        return {
+            name: fullName,
+            value: managers.id,
         }
     })    
-    console.log(roleArray);
     
     inquirer.prompt([
         {
@@ -142,39 +149,28 @@ const addEmployee = async () => {
             message: 'Pick a role',
             choices: roleArray,
         },
-        // {
-        //     name: 'department',
-        //     type: 'input',
-        //     message: 'Department: ',
-        // },
-        // {
-        //     name: 'manager',
-        //     type: 'input',
-        //     message: 'Manager: ',
-        // },
+        {
+            name: 'manager',
+            type: 'rawlist',
+            message: 'Manager: ',
+            choices: managerArray,
+        },
     ]).then((answer) => {
         console.log(answer);
-        // connection.query(
-        //     'INSERT INTO employee SET ?',
-        //     {
-        //         first_name: answer.firstName,
-        //         last_name: answer.lastName,
-        //     },
-            // 'INSERT INTO role SET ?',
-            // {
-            //     title: answer.role,
-            // },
-            // 'INSERT INTO department SET ?',
-            // {
-            //     name: answer.department,
-            //     manager: answer.manager,
-            // },
-            // (err) => {
-            //     if (err) throw err;
-            //     console.log('Successfully added employee');
-            //     startSearch();
-        //     }
-        // );
+        connection.query(
+            'INSERT INTO employee SET ?',
+            {
+                first_name: answer.firstName,
+                last_name: answer.lastName,
+                role_id: answer.role,
+                manager_id: answer.manager,
+            },
+            (err) => {
+                if (err) throw err;
+                console.log('Successfully added employee');
+                startSearch();
+            }
+        );
     });
 };
                
@@ -191,18 +187,59 @@ const addDepartment = () => {
             type: 'input',
             message: 'Department name: ',
         },
-        {
-            name: 'manager',
-            type: 'input',
-            message: 'Manager name',
-        }
     ]).then((answer) => {
         connection.query(
             'INSERT INTO department SET ?',
             {
                 name: answer.department,
-                manager: answer.manager,
+            },
+            (err) => {
+                if (err) throw err;
+                console.log('Successfully added a new department');
+                startSearch();
+            }
+        );
+    });
+};
+
+const addRole = async () => {
+    const allDepartments = await selectAll('department')
+    const departmentArray = allDepartments.map(function(department){
+        return {
+            name: department.name,
+            value: department.id,
+        }
+    })
+    inquirer.prompt([
+        {
+            name: 'role',
+            type: 'input',
+            message: 'Title: ',
+        },
+        {
+            name: 'salary',
+            type: 'number',
+            message: 'Salary: ',
+        },
+        {
+            name: 'department',
+            type: 'rawlist',
+            message: 'Select the department where this role will work: ',
+            choices: departmentArray,
+        },
+    ]).then((answer) => {
+        connection.query(
+            'INSERT INTO role SET ?',
+            {
+                title: answer.role,
+                salary: answer.salary,
+                department_id: answer.department,
+            },
+            (err) => {
+                if (err) throw err;
+                console.log('Successfully added a new role');
+                startSearch();
             }
         )
     })
-};
+}
