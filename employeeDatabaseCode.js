@@ -28,6 +28,7 @@ const startSearch = () => {
             'Add a department',
             'Add a role',
             'Update an employee role',
+            'Exit',
         ],
     }).then((answer) => {
         switch (answer.action) {
@@ -48,6 +49,8 @@ const startSearch = () => {
                 break;
             case 'Add a role':
                 addRole();
+                break;
+            case 'Exit':
                 break;
             default:
                 console.log(`Invalid: ${answer.action}`);
@@ -188,11 +191,15 @@ const updateRole = async () => {
             choices: roleArray,
         },
     ]).then((answer) => {
-        
+        let query = 'UPDATE employee SET role_id = ? WHERE id = ?'
+        connection.query(query, [answer.role, answer.employee], (err, res) => {
+            if (err) throw err;
+            console.table(res)
+            startSearch();
+        })
     })
 };
               
-
 const addDepartment = () => {
     inquirer.prompt([
         {
