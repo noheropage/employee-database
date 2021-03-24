@@ -24,13 +24,10 @@ const startSearch = () => {
         choices: [
             'View all employees',
             'View all employees by department',
-            // 'View all employees by manager',
             'Add an employee',
             'Add a department',
             'Add a role',
-            // 'Remove an employee',
             'Update an employee role',
-            // 'Update an employee manager',
         ],
     }).then((answer) => {
         switch (answer.action) {
@@ -40,21 +37,12 @@ const startSearch = () => {
             case 'View all employees by department':
                 departmentSearch();
                 break;
-            // case 'View all employees by manager':
-            //     managerSearch();
-            //     break;
             case 'Add an employee':
                 addEmployee();
                 break;
-            // case 'Remove an employee':
-            //     removeEmployee();
-            //     break;
-            // case 'Update an employee role':
-            //     updateRole();
-            //     break;
-            // case 'Update an employee manager':
-            //     updateManager();
-            //     break;
+            case 'Update an employee role':
+                updateRole();
+                break;
             case 'Add a department':
                 addDepartment();
                 break;
@@ -69,7 +57,7 @@ const startSearch = () => {
 };
 
 const employeeSearch = () => {
-    connection.query('SELECT employee.id, employee.first_name, employee.last_name, department.name AS department, role.title AS title, role.salary FROM employee JOIN role ON (employee.role_id=role.id) JOIN department ON (role.department_id=department.id)', (err, res) => {
+    connection.query('SELECT employee.id, employee.first_name, employee.last_name, department.name AS department, role.title AS title, role.salary, employee.manager_id AS manager, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role ON (employee.role_id=role.id) LEFT JOIN department ON (role.department_id=department.id) LEFT JOIN employee manager ON (manager.id = employee.manager_id)', (err, res) => {
         if (err) throw err;
         console.table(res);
         startSearch();
@@ -98,46 +86,6 @@ const departmentSearch = async () => {
         })
     })
 };
-
-// const findManagers = async () => {
-//     const allEmployees = await selectAll('employee')
-//     const employeeArray = allEmployees.map(function(employees){
-//         return {
-//             name: employees.first_name + ' ' + employees.last_name,
-//             value: employees.id
-//         }
-//     })
-// }
-
-// const managerSearch = async () => {
-//     const allEmployees = await selectAll('employee')
-//     // if manager_id is not null, return the employee info with that id 
-//     const employeeArray = allEmployees.map(function(employees){
-//         return {
-//             name: employees.first_name + ' ' + employees.last_name,
-//             value: employees.id
-//         }
-//     })
-//     inquirer.prompt({
-//         name: 'manager',
-//         type: 'list',
-//         message: 'What manager would you like to search for?',
-//         choices: employeeArray,
-//     }).then((answer) => {
-//         let query = 'SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role ON (employee.role_id=role.id) INNER JOIN department ON (role.department_id=department.id) WHERE (employee.manager_id = ?)'
-//         console.log(query[0]);
-//         if (query[0] == 0) {
-//             console.log('That employee is not a manager');
-//             managerSearch();
-//         } else {
-//             connection.query(query, [answer.manager, answer.manager], (err, res) => {
-//             if (err) throw err;
-//             console.table(res)
-//             startSearch();
-//         })
-//         }
-//     })
-// };
 
 const selectAll = (tableName) => {
     return new Promise((resolve) => {
@@ -207,12 +155,43 @@ const addEmployee = async () => {
         );
     });
 };
-               
-// removeEmployee();
               
-// updateRole();
+const updateRole = async () => {
+    const allRoles = await selectAll('role')
+    const allEmployees = await selectAll('employee')
+    const roleArray = allRoles.map(function(role){
+        return {
+            name: role.title,
+            value: role.id,
+        }
+    })
+
+    const employeeArray = allEmployees.map(function(employee){
+        const fullName = employee.first_name + " " + employee.last_name;
+        return {
+            name: fullName,
+            value: employee.id,
+        }
+    })
+    
+    inquirer.prompt([
+        {
+            name: 'employee',
+            type: 'list',
+            message: 'Which employee would you like to update?',
+            choices: employeeArray,
+        },
+        {
+            name: 'role',
+            type: 'list',
+            message: "What is the employee's updated role?",
+            choices: roleArray,
+        },
+    ]).then((answer) => {
+        
+    })
+};
               
-// updateManager();
 
 const addDepartment = () => {
     inquirer.prompt([
