@@ -3,6 +3,7 @@ const inquirer = require('inquirer');
 
 require('dotenv').config();
 
+// creates connection and hides personal info
 const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
@@ -59,6 +60,7 @@ const startSearch = () => {
     });
 };
 
+// creates a display table with all employee data from the three different tables
 const employeeSearch = () => {
     connection.query('SELECT employee.id, employee.first_name, employee.last_name, department.name AS department, role.title AS title, role.salary, employee.manager_id AS manager, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role ON (employee.role_id=role.id) LEFT JOIN department ON (role.department_id=department.id) LEFT JOIN employee manager ON (manager.id = employee.manager_id)', (err, res) => {
         if (err) throw err;
@@ -68,6 +70,7 @@ const employeeSearch = () => {
 }
 
 const departmentSearch = async () => {
+    // finds all the departments in the department table and puts them into an array with the names displayed and the id stored
     const allDepartments = await selectAll('department')
     const departmentArray = allDepartments.map(function(department){
         return {
@@ -80,6 +83,7 @@ const departmentSearch = async () => {
         type: 'rawlist',
         message: 'Which department would you like to view?',
         choices: departmentArray,
+
     }).then((answer) => {
         let query = 'SELECT employee.first_name, employee.last_name, role.title AS title, role.salary, department.name FROM employee JOIN role ON (employee.role_id=role.id) JOIN department ON (role.department_id=department.id) WHERE (department.id = ?)'
         connection.query(query, [answer.department, answer.department], (err, res) => {
@@ -90,6 +94,7 @@ const departmentSearch = async () => {
     })
 };
 
+// used to access different tables and help retrieve data
 const selectAll = (tableName) => {
     return new Promise((resolve) => {
         connection.query(`SELECT * FROM ${tableName}`, (err, res) => {
@@ -100,6 +105,7 @@ const selectAll = (tableName) => {
 }
 
 const addEmployee = async () => {
+    // creates arrays for roles and employees 
     const allRoles = await selectAll('role')
     const allManagers = await selectAll('employee')
     const roleArray = allRoles.map(function(role){
@@ -108,12 +114,13 @@ const addEmployee = async () => {
             value: role.id,
         }
     })
-
+    
     const managerArray = allManagers.map(function(managers){
         const fullName = managers.first_name + " " + managers.last_name;
         return {
             name: fullName,
             value: managers.id,
+            short: fullName,
         }
     })    
     
@@ -130,18 +137,26 @@ const addEmployee = async () => {
         },
         {
             name: 'role',
-            type: 'rawlist',
+            type: 'list',
             message: 'Pick a role',
             choices: roleArray,
         },
+        // not all employees have a manager
+        {
+            name: 'confirm',
+            type: 'confirm',
+            message: 'Does this employee have a manager?',
+            default: true,
+        },
         {
             name: 'manager',
-            type: 'rawlist',
+            type: 'list',
             message: 'Manager: ',
             choices: managerArray,
+            when: (answer) => answer.confirm === true,
         },
     ]).then((answer) => {
-        console.log(answer);
+        // add the info from the questions into the employee table
         connection.query(
             'INSERT INTO employee SET ?',
             {
@@ -160,6 +175,7 @@ const addEmployee = async () => {
 };
               
 const updateRole = async () => {
+    // create array for employees and roles
     const allRoles = await selectAll('role')
     const allEmployees = await selectAll('employee')
     const roleArray = allRoles.map(function(role){
@@ -191,6 +207,7 @@ const updateRole = async () => {
             choices: roleArray,
         },
     ]).then((answer) => {
+        // edit current data with updated role
         let query = 'UPDATE employee SET role_id = ? WHERE id = ?'
         connection.query(query, [answer.role, answer.employee], (err, res) => {
             if (err) throw err;
@@ -223,6 +240,7 @@ const addDepartment = () => {
 };
 
 const addRole = async () => {
+    // create array to store name of all departments
     const allDepartments = await selectAll('department')
     const departmentArray = allDepartments.map(function(department){
         return {
