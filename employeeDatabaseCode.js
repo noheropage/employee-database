@@ -211,7 +211,7 @@ const updateRole = async () => {
         let query = 'UPDATE employee SET role_id = ? WHERE id = ?'
         connection.query(query, [answer.role, answer.employee], (err, res) => {
             if (err) throw err;
-            console.table(res)
+            console.log("Sucessfully updated employee role");
             startSearch();
         })
     })
