@@ -13,3 +13,4 @@ App uses Node.js, inquirer, mysql, and console.table for displaying data.
     node employeeDatabaseCode
 
 #### YouTube Video Link:
+[Running the content management system in the VS Code command line](https://youtu.be/SLcz1BO2Y7A "Employee Database App")
